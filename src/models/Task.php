@@ -21,35 +21,6 @@ class Task
 
     private $task;
 
-    public static function populateSlice(string $orderBy, int $limit, int $offset, PDO | null $pdo): void
-    {
-        // NOTE: Condition is usefull for unit testing
-        if (empty($pdo)) 
-            $pdo = PDOFactory::readInstance();
-
-        $query = $pdo->prepare('
-            SELECT id, user_email, name, text, status, edited 
-            FROM `task` 
-            ORDER BY $orderBy 
-            LIMIT :slice_limit 
-            OFFSET :slice_offset
-        ');
-
-        $query->execute([
-            'slice_limit' => $limit,
-            'slice_offset' => $offset,  
-        ]);
-
-        while ($object = $query->fetchObject('\models\Task')) 
-            self::$slice[(int)$object->getId()] = $object;
-    }
-
-    public static function getSlice(string $orderBy, int $limit, int $offset): array
-    {
-        self::populateSlice($orderBy, $limit, $offset, null);
-
-        return self::$slice;
-    }
 
     public static function get(int $id, PDO | null $pdo): Task
     {
@@ -72,15 +43,34 @@ class Task
         return self::$slice[$id];
     }
 
-    public static function countAll(PDO | null $pdo): mixed
+    public static function getSlice(string $orderBy, int $limit, int $offset): array
     {
+        self::populateSlice($orderBy, $limit, $offset, null);
+
+        return self::$slice;
+    }
+
+    public static function populateSlice(string $orderBy, int $limit, int $offset, PDO | null $pdo): void
+    {
+        // NOTE: Condition is usefull for unit testing
         if (empty($pdo)) 
             $pdo = PDOFactory::readInstance();
 
-        $query = $pdo->prepare('SELECT count(*) FROM `task`');
-        $query->execute();
+        $query = $pdo->prepare('
+            SELECT id, user_email, name, text, status, edited 
+            FROM `task` 
+            ORDER BY $orderBy 
+            LIMIT :slice_limit 
+            OFFSET :slice_offset
+        ');
 
-        return $query->fetchColumn();  
+        $query->execute([
+            'slice_limit' => $limit,
+            'slice_offset' => $offset,  
+        ]);
+
+        while ($object = $query->fetchObject('\models\Task')) 
+            self::$slice[(int)$object->getId()] = $object;
     }
 
     public function create(array $data, PDO | null $pdo): bool
@@ -150,6 +140,17 @@ class Task
             ':text'         => $data['task_text'] ?? $this->getText(),
             ':edited'       => $edited,
         ]);
+    }
+
+    public static function countAll(PDO | null $pdo): mixed
+    {
+        if (empty($pdo)) 
+            $pdo = PDOFactory::readInstance();
+
+        $query = $pdo->prepare('SELECT count(*) FROM `task`');
+        $query->execute();
+
+        return $query->fetchColumn();  
     }
 
     public function getId(): ?int
