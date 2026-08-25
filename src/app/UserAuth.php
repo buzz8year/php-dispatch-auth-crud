@@ -8,7 +8,7 @@ class UserAuth
 {
     private static $authenticated_user;
 
-    public static function clearAuthenticatedUser(): void
+    public static function unsetAuthenticatedUser(): void
     {
         self::$authenticated_user = null;
 
