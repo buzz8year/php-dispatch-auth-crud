@@ -7,6 +7,7 @@ use PDO;
 
 class Task 
 {
+    public const int STATUS_NEW = 1;
     public const int STATUS_COMPLETED = 2;
     public const string SORT_DEFAULT = 'id';
     public static array $slice = [];
@@ -111,7 +112,7 @@ class Task
 
         return $query->execute([
             ':edited'       => 0,
-            ':status'       => 1,
+            ':status'       => self::STATUS_NEW,
             ':name'         => $data['task_name'],
             ':user_email'   => $data['task_usermail'],
             ':text'         => $data['task_text'],
