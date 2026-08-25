@@ -65,11 +65,11 @@ class Task
 
         $query->execute([':id' => $id ]);
 
-        self::$slice[(int)$id] = $query->rowCount() === 1 
+        self::$slice[$id] = $query->rowCount() === 1 
             ? $query->fetchObject('\models\Task')
             : new self;
 
-        return self::$slice[(int)$id];
+        return self::$slice[$id];
     }
 
     public static function countAll(PDO | null $pdo): mixed
